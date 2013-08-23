@@ -4,7 +4,9 @@ algorithms, including among others PCA, NMF or ICA. Most of the algorithms of
 this module can be regarded as dimensionality reduction techniques.
 """
 
+
 from .nmf import NMF, ProjectedGradientNMF, non_negative_factorization
+from .mf import MatrixFactorization
 from .pca import PCA, RandomizedPCA
 from .incremental_pca import IncrementalPCA
 from .kernel_pca import KernelPCA
@@ -22,6 +24,7 @@ __all__ = ['DictionaryLearning',
            'FastICA',
            'IncrementalPCA',
            'KernelPCA',
+           'MatrixFactorization',
            'MiniBatchDictionaryLearning',
            'MiniBatchSparsePCA',
            'NMF',

@@ -74,6 +74,20 @@ def test_non_meta_estimators():
             else:
                 yield check, name, Estimator
 
+        if name not in CROSS_DECOMPOSITION + ["MatrixFactorization"] and not name.endswith("Imputer"):
+            # Test that all estimators check their input for NaN's and infs
+            yield check_estimators_nan_inf, name, Estimator
+
+        if (name not in ['CCA', '_CCA', 'PLSCanonical', 'PLSRegression',
+                         'PLSSVD', 'GaussianProcess']):
+            # FIXME!
+            # in particular GaussianProcess!
+            yield check_estimators_overwrite_params, name, Estimator
+        if hasattr(Estimator, 'sparsify'):
+            yield check_sparsify_coefficients, name, Estimator
+
+        yield check_estimator_sparse_data, name, Estimator
+
 def test_configure():
     # Smoke test the 'configure' step of setup, this tests all the
     # 'configure' functions in the setup.pys in the scikit

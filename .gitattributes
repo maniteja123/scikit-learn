@@ -6,6 +6,7 @@
 /sklearn/datasets/_svmlight_format.c -diff
 /sklearn/decomposition/_online_lda.c -diff
 /sklearn/decomposition/cdnmf_fast.c -diff
+/sklearn/decomposition/_mf.c -diff
 /sklearn/ensemble/_gradient_boosting.c -diff
 /sklearn/feature_extraction/_hashing.c -diff
 /sklearn/linear_model/cd_fast.c -diff

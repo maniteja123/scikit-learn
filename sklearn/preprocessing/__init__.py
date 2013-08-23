@@ -28,12 +28,13 @@ from .label import LabelBinarizer
 from .label import LabelEncoder
 from .label import MultiLabelBinarizer
 
-from .imputation import Imputer
+from .imputation import Imputer, FactorizationImputer
 
 
 __all__ = [
     'Binarizer',
     'FunctionTransformer',
+    'FactorizationImputer',
     'Imputer',
     'KernelCenterer',
     'LabelBinarizer',

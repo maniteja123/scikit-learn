@@ -3,17 +3,18 @@ import numpy as np
 from scipy import sparse
 
 from sklearn.utils.testing import assert_equal
+from sklearn.utils.testing import assert_allclose
 from sklearn.utils.testing import assert_array_equal
 from sklearn.utils.testing import assert_raises
 from sklearn.utils.testing import assert_false
 from sklearn.utils.testing import assert_true
 
-from sklearn.preprocessing.imputation import Imputer
+
+from sklearn.preprocessing.imputation import Imputer, FactorizationImputer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn import tree
 from sklearn.random_projection import sparse_random_matrix
- 
 
 def _check_statistics(X, X_true,
                       strategy, statistics, missing_values):
@@ -293,68 +294,95 @@ def test_imputation_pickle():
 
 
 def test_imputation_copy():
-    # Test imputation with copy
-    X_orig = sparse_random_matrix(5, 5, density=0.75, random_state=0)
-
-    # copy=True, dense => copy
-    X = X_orig.copy().toarray()
-    imputer = Imputer(missing_values=0, strategy="mean", copy=True)
-    Xt = imputer.fit(X).transform(X)
-    Xt[0, 0] = -1
-    assert_false(np.all(X == Xt))
-
-    # copy=True, sparse csr => copy
-    X = X_orig.copy()
-    imputer = Imputer(missing_values=X.data[0], strategy="mean", copy=True)
-    Xt = imputer.fit(X).transform(X)
-    Xt.data[0] = -1
-    assert_false(np.all(X.data == Xt.data))
-
-    # copy=False, dense => no copy
-    X = X_orig.copy().toarray()
-    imputer = Imputer(missing_values=0, strategy="mean", copy=False)
-    Xt = imputer.fit(X).transform(X)
-    Xt[0, 0] = -1
-    assert_true(np.all(X == Xt))
-
-    # copy=False, sparse csr, axis=1 => no copy
-    X = X_orig.copy()
-    imputer = Imputer(missing_values=X.data[0], strategy="mean",
-                      copy=False, axis=1)
-    Xt = imputer.fit(X).transform(X)
-    Xt.data[0] = -1
-    assert_true(np.all(X.data == Xt.data))
-
-    # copy=False, sparse csc, axis=0 => no copy
-    X = X_orig.copy().tocsc()
-    imputer = Imputer(missing_values=X.data[0], strategy="mean",
-                      copy=False, axis=0)
-    Xt = imputer.fit(X).transform(X)
-    Xt.data[0] = -1
-    assert_true(np.all(X.data == Xt.data))
-
-    # copy=False, sparse csr, axis=0 => copy
-    X = X_orig.copy()
-    imputer = Imputer(missing_values=X.data[0], strategy="mean",
-                      copy=False, axis=0)
-    Xt = imputer.fit(X).transform(X)
-    Xt.data[0] = -1
-    assert_false(np.all(X.data == Xt.data))
-
-    # copy=False, sparse csc, axis=1 => copy
-    X = X_orig.copy().tocsc()
-    imputer = Imputer(missing_values=X.data[0], strategy="mean",
-                      copy=False, axis=1)
-    Xt = imputer.fit(X).transform(X)
-    Xt.data[0] = -1
-    assert_false(np.all(X.data == Xt.data))
-
-    # copy=False, sparse csr, axis=1, missing_values=0 => copy
-    X = X_orig.copy()
-    imputer = Imputer(missing_values=0, strategy="mean",
-                      copy=False, axis=1)
-    Xt = imputer.fit(X).transform(X)
-    assert_false(sparse.issparse(Xt))
-
     # Note: If X is sparse and if missing_values=0, then a (dense) copy of X is
     # made, even if copy=False.
+
+    """Test imputation with copy=True."""
+    l = 5
+
+    # Test default behaviour and with copy=True
+    for params in [{}, {'copy': True}]:
+        X = sparse_random_matrix(l, l, density=0.75, random_state=0)
+
+        # Dense
+        imputer = Imputer(missing_values=0, strategy="mean", **params)
+        Xt = imputer.fit(X).transform(X)
+        Xt[0, 0] = np.nan
+        # Check that the objects are different and that they don't use
+        # the same buffer
+        assert_false(np.all(X.todense() == Xt))
+
+        # Sparse
+        imputer = Imputer(missing_values=0, strategy="mean", **params)
+        X = X.todense()
+        Xt = imputer.fit(X).transform(X)
+        Xt[0, 0] = np.nan
+        # Check that the objects are different and that they don't use
+        # the same buffer
+        assert_false(np.all(X == Xt))
+
+def test_factorization():
+    # TODO: add more test cases, e.g. w/ sparsity
+
+    random_state = np.random.RandomState(0)
+
+    n_samples = 20
+    n_features = 15
+    rank = 3
+
+    L = random_state.rand(n_samples, rank)
+    R = random_state.rand(rank, n_features)
+
+    X = np.dot(L, R)
+    X_corrupted = X.copy()
+    for i in range(n_samples):
+        for j in range(3):
+            X_corrupted[i, (i % 5) + j * 5] = np.nan
+
+    factorizers = [
+        FactorizationImputer(
+            n_iter=100,
+            algorithm='sgd',
+            n_components=rank,
+            learning_rate=0.5,
+            fit_intercept=True,
+            random_state=random_state,
+            verbose=0),
+
+        FactorizationImputer(
+            n_iter=100,
+            algorithm='sgd_adagrad',
+            n_components=rank,
+            learning_rate=0.5,
+            fit_intercept=True,
+            random_state=random_state,
+            verbose=0),
+
+        FactorizationImputer(
+            n_iter=100,
+            algorithm='als1',
+            n_components=rank,
+            learning_rate=1,
+            fit_intercept=True,
+            random_state=random_state,
+            verbose=0),
+
+        FactorizationImputer(
+            n_iter=100,
+            algorithm='als',
+            n_components=rank,
+            learning_rate=1,
+            fit_intercept=True,
+            random_state=random_state,
+            verbose=0)
+    ]
+
+    for i, mfi in enumerate(factorizers):
+        X_imputed = mfi.fit_transform(X_corrupted)
+
+        assert_true(X.shape == X_imputed.shape)
+        assert_false(sparse.issparse(X_imputed))
+        assert_allclose(X_imputed, X, atol=1e-2)
+
+        mask = np.logical_not(np.isnan(X_corrupted))
+        assert_allclose(X_imputed[mask], X_corrupted[mask])
