@@ -1,20 +1,33 @@
 import numpy as np
 import scipy.sparse as sp
 
+from sklearn.cross_validation import train_test_split
+from sklearn.utils.testing import assert_almost_equal
 from sklearn.utils.testing import assert_array_equal
 from sklearn.utils.testing import assert_equal
-from sklearn.utils.testing import assert_almost_equal
-from sklearn.utils.testing import assert_true
 from sklearn.utils.testing import assert_false
+from sklearn.utils.testing import assert_greater
 from sklearn.utils.testing import assert_raises
+from sklearn.utils.testing import assert_true
 from sklearn.utils.testing import assert_warns
 from sklearn.utils.testing import assert_greater
 from sklearn.utils.testing import assert_raise_message
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.multiclass import OneVsOneClassifier
 from sklearn.multiclass import OutputCodeClassifier
+from sklearn.multiclass import LabelPowerSetClassifier
+
 from sklearn.utils.multiclass import check_classification_targets, type_of_target
 from sklearn.utils import shuffle
+from sklearn.utils.testing import ignore_warnings
+
+from sklearn.multiclass import fit_ovr
+from sklearn.multiclass import fit_ovo
+from sklearn.multiclass import fit_ecoc
+from sklearn.multiclass import predict_ovr
+from sklearn.multiclass import predict_ovo
+from sklearn.multiclass import predict_ecoc
+from sklearn.multiclass import predict_proba_ovr
 
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
@@ -649,3 +662,58 @@ def test_pairwise_cross_val_score():
         score_precomputed = cross_val_score(ovr_true, linear_kernel, y)
         score_linear = cross_val_score(ovr_false, X, y)
         assert_array_equal(score_precomputed, score_linear)
+
+
+def test_lps_binary():
+    X, Y = datasets.make_classification(n_samples=50,
+                                        n_features=20,
+                                        random_state=0)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=0)
+
+    lps = LabelPowerSetClassifier(LinearSVC(random_state=0))
+    lps.fit(X_train, Y_train)
+    out_lps = lps.predict(X_test)
+
+    svc = LinearSVC(random_state=0)
+    svc.fit(X_train, Y_train)
+    out_svc = svc.predict(X_test)
+
+    assert_equal(out_lps.shape, Y_test.shape)
+    assert_array_equal(out_lps, out_svc)
+    assert_equal(len(lps.label_binarizer_.classes_), 2)
+
+
+def test_lps_multiclass():
+    lps = LabelPowerSetClassifier(LinearSVC(random_state=0))
+    lps.fit(iris.data, iris.target)
+    out_lp = lps.predict(iris.data)
+
+    svc = LinearSVC(random_state=0)
+    svc.fit(iris.data, iris.target)
+    out_svc = svc.predict(iris.data)
+
+    assert_array_equal(out_lp, out_svc)
+    assert_equal(len(lps.label_binarizer_.classes_), 3)
+
+
+def test_lps_multilabel(n_samples=50):
+    X, Y = datasets.make_multilabel_classification(n_samples=n_samples,
+                                                   n_features=20,
+                                                   n_classes=3,
+                                                   random_state=0,
+                                                   return_indicator=True)
+
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=0)
+
+    lps = LabelPowerSetClassifier(DecisionTreeClassifier(random_state=0,
+                                                         max_depth=3))
+    lps.fit(X_train, Y_train)
+    out_lps = lps.predict(X_test)
+    assert_equal(out_lps.shape, Y_test.shape)
+
+    y_predict_proba = lps.predict_proba(X_test)
+    for proba_k in y_predict_proba:
+        print(proba_k)
+        assert_equal(proba_k.shape, (X_test.shape[0], 2))
+
+    assert False
