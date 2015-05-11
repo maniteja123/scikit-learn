@@ -6,10 +6,14 @@ networks.
 # Licence: BSD 3 clause
 
 from .rbm import BernoulliRBM
+from .random_basis_function import RandomBasisFunction
 
 from .multilayer_perceptron import MLPClassifier
 from .multilayer_perceptron import MLPRegressor
 
+from .random_basis_function import RandomBasisFunction
+
 __all__ = ["BernoulliRBM",
            "MLPClassifier",
-           "MLPRegressor"]
+           "MLPRegressor",
+           "RandomBasisFunction"]
