@@ -218,6 +218,11 @@ class DictVectorizer(BaseEstimator, TransformerMixin):
             objects) to feature values (strings or convertible to dtype).
         y : (ignored)
 
+        Raises
+        ------
+        ValueError
+            If sequence X is empty
+
         Returns
         -------
         Xa : {array, sparse matrix}

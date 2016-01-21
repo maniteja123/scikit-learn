@@ -323,6 +323,13 @@ def extract_patches_2d(image, patch_size, max_patches=None, random_state=None):
         Pseudo number generator state used for random sampling to use if
         `max_patches` is not None.
 
+    Raises
+    ------
+    ValueError
+        If ``max_patches`` is not Int or Float
+        If height of the patch ``p_h`` greater than height of image ``i_h``
+        If width of the patch ``p_w`` greater than the width of image ``i_w``
+
     Returns
     -------
     patches : array, shape = (n_patches, patch_height, patch_width) or

@@ -781,6 +781,12 @@ class CountVectorizer(BaseEstimator, VectorizerMixin):
         raw_documents : iterable
             An iterable which yields either str, unicode or file objects.
 
+        Raises
+        ------
+        ValueError
+            If ``max_df`` corresponds to documents < than ``min_df``
+            If duplicate term in vocabulary
+
         Returns
         -------
         self
@@ -798,6 +804,12 @@ class CountVectorizer(BaseEstimator, VectorizerMixin):
         ----------
         raw_documents : iterable
             An iterable which yields either str, unicode or file objects.
+
+        Raises
+        ------
+        ValueError
+            If ``max_df`` corresponds to documents < than ``min_df``
+            If duplicate term in vocabulary
 
         Returns
         -------
@@ -830,7 +842,7 @@ class CountVectorizer(BaseEstimator, VectorizerMixin):
                              else min_df * n_doc)
             if max_doc_count < min_doc_count:
                 raise ValueError(
-                    "max_df corresponds to < documents than min_df")
+                    "max_df corresponds to documents <  than min_df")
             X, self.stop_words_ = self._limit_features(X, vocabulary,
                                                        max_doc_count,
                                                        min_doc_count,
@@ -850,6 +862,14 @@ class CountVectorizer(BaseEstimator, VectorizerMixin):
         ----------
         raw_documents : iterable
             An iterable which yields either str, unicode or file objects.
+
+        Raises
+        ------
+        ValueError                
+            If duplicate term in vocabulary
+            If Vocabulary contains repeated indices
+            If Vocabulary of does not contain index
+            If Vocabulary is empty
 
         Returns
         -------
@@ -1006,6 +1026,11 @@ class TfidfTransformer(BaseEstimator, TransformerMixin):
         copy : boolean, default True
             Whether to copy X and operate on the copy or perform in-place
             operations.
+
+        Raises
+        ------
+        ValueError
+            Input for fit and transform have different ``n_features``
 
         Returns
         -------

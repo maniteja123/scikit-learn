@@ -105,6 +105,14 @@ class FeatureHasher(BaseEstimator, TransformerMixin):
         This method doesn't do anything. It exists purely for compatibility
         with the scikit-learn transformer API.
 
+        Raises
+        ------
+        TypeError
+            If ``n_features`` not integral value
+        ValueError
+            If ``n_features`` < 1 or ``n_features`` >= 2 ** 31
+            If ``input_type`` not ``dict``, `pair`` or ``string``
+
         Returns
         -------
         self : FeatureHasher
@@ -126,6 +134,11 @@ class FeatureHasher(BaseEstimator, TransformerMixin):
             raw_X need not support the len function, so it can be the result
             of a generator; n_samples is determined on the fly.
         y : (ignored)
+
+        Raises
+        ------
+        ValueError
+            If ``n_samples`` because we cannot vectorize empty sequence
 
         Returns
         -------
