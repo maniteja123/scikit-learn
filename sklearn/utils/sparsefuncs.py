@@ -73,6 +73,13 @@ def mean_variance_axis(X, axis):
     axis: int (either 0 or 1)
         Axis along which the axis should be computed.
 
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
+    ValueError
+        If axis not 0(rows) or 1(columns)
+
     Returns
     -------
 
@@ -125,6 +132,13 @@ def incr_mean_variance_axis(X, axis, last_mean, last_var, last_n):
     last_n: int
         Number of samples seen so far, excluded X.
 
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
+    ValueError
+        If axis not 0(rows) or 1(columns)
+
     Returns
     -------
 
@@ -171,6 +185,11 @@ def inplace_column_scale(X, scale):
 
     scale: float array with shape (n_features,)
         Array of precomputed feature-wise values to use for scaling.
+
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
     """
     if isinstance(X, sp.csc_matrix):
         inplace_csr_row_scale(X.T, scale)
@@ -193,6 +212,11 @@ def inplace_row_scale(X, scale):
 
     scale : float array with shape (n_features,)
         Array of precomputed sample-wise values to use for scaling.
+
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
     """
     if isinstance(X, sp.csc_matrix):
         inplace_csr_column_scale(X.T, scale)
@@ -216,6 +240,11 @@ def inplace_swap_row_csc(X, m, n):
 
     n: int
         Index of the row of X to be swapped.
+
+    Raises
+    ------
+    TypeError
+        If ``m`` and ``n`` are not valid integers
     """
     for t in [m, n]:
         if isinstance(t, np.ndarray):
@@ -245,6 +274,11 @@ def inplace_swap_row_csr(X, m, n):
 
     n: int
         Index of the row of X to be swapped.
+
+    Raises
+    ------
+    TypeError
+        If ``m`` and ``n`` are not valid integers
     """
     for t in [m, n]:
         if isinstance(t, np.ndarray):
@@ -323,6 +357,11 @@ def inplace_swap_column(X, m, n):
 
     n : int
         Index of the column of X to be swapped.
+
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
     """
     if m < 0:
         m += X.shape[1]
@@ -355,6 +394,11 @@ def min_max_axis(X, axis):
 
     maxs: float array with shape (n_features,)
         Feature-wise maxima
+
+    Raises
+    ------
+    TypeError
+        If X is not a CSR or CSC matrix
     """
     if isinstance(X, sp.csr_matrix) or isinstance(X, sp.csc_matrix):
         return sparse_min_max(X, axis=axis)
@@ -377,6 +421,13 @@ def count_nonzero(X, axis=None, sample_weight=None):
 
     sample_weight : array, shape = (n_samples,), optional
         Weight for each row of X.
+
+    Raises
+    ------
+    TypeError
+        If X is not a CSR matrix
+    ValueError
+        If unsupported ``axis`` when ``axis``> 1
     """
     if axis == -1:
         axis = 1
@@ -446,6 +497,11 @@ def csc_median_axis_0(X):
     ----------
     X : CSC sparse matrix, shape (n_samples, n_features)
         Input data.
+
+    Raises
+    ------
+    TypeError
+        If X is not CSC matrix
 
     Returns
     -------

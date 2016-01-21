@@ -29,6 +29,13 @@ def compute_class_weight(class_weight, classes, y):
     y : array-like, shape (n_samples,)
         Array of original class labels per sample;
 
+    Raises
+    ------
+    ValueError
+        If classes have invalid labels that are not in y when
+           class_weight is ``auto`` or ``balanced``
+        If class_weight is not ``dict``, ``auto`` or ``None``
+        If Class label %d not present
     Returns
     -------
     class_weight_vect : ndarray, shape (n_classes,)
@@ -106,6 +113,15 @@ def compute_sample_weight(class_weight, y, indices=None):
         case of a bootstrap subsample with repeated indices. If None, the
         sample weight will be calculated over the full sample. Only "auto" is
         supported for class_weight if this is provided.
+
+    Raises
+    ------
+    ValueError
+        If class_weight is not ``auto`` or ``balanced``
+        For multi-output, class_weight is not either list of dicts,
+        or a valid string when ``n_outputs`` > 1
+        If number of elements in class_weight is not matching ``n_outputs.``
+        when ``n_outputs`` > 1
 
     Returns
     -------

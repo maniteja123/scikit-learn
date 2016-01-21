@@ -224,6 +224,13 @@ def random_choice_csc(n_samples, classes, class_probability=None,
         If None, the random number generator is the RandomState instance used
         by `np.random`.
 
+    Raises
+    ------
+    ValueError
+        If array dtype is not `Integer` or `i`
+        If class probability does not sum to 1.
+        If a class and corresponding class_probability have different length.
+
     Returns
     -------
     random_matrix : sparse csc matrix of size (n_samples, n_outputs)

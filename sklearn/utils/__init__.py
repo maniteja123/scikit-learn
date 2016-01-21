@@ -117,6 +117,17 @@ def resample(*arrays, **options):
     random_state : int or RandomState instance
         Control the shuffling for reproducible behavior.
 
+    Raises
+    ------
+    ValueError
+        If the arrays have inconsistent number of samples.
+        If options other than ``replace``, ``n_samples`` or ``random_state``
+            are provided as kwargs
+        If number of samples is less than ``n_samples`` when not None
+
+    TypeError
+        If one of arrays has Singleton array that cannot be considered valid.
+
     Returns
     -------
     resampled_arrays : sequence of indexable data-structures
@@ -217,6 +228,17 @@ def shuffle(*arrays, **options):
         Number of samples to generate. If left to None this is
         automatically set to the first dimension of the arrays.
 
+    Raises
+    ------
+    ValueError
+        If the arrays have inconsistent number of samples.
+        If options other than ``replace``, ``n_samples`` or ``random_state``
+            are provided as kwargs
+        If number of samples is less than ``n_samples`` when not None
+
+    TypeError
+        If one of arrays has Singleton array that cannot be considered valid.
+
     Returns
     -------
     shuffled_arrays : sequence of indexable data-structures
@@ -274,6 +296,11 @@ def safe_sqr(X, copy=True):
         Whether to create a copy of X and operate on it or to perform
         inplace computation (default behaviour).
 
+    ValueError
+        If X contains NaN or infinity when ``force_all_finite`` is True and
+            ``array`` is sparse
+        If X with dim > 2
+
     Returns
     -------
     X ** 2 : element wise square
@@ -319,8 +346,25 @@ def gen_batches(n, batch_size):
 def gen_even_slices(n, n_packs, n_samples=None):
     """Generator to create n_packs slices going up to n.
 
-    Pass n_samples when the slices are to be used for sparse matrix indexing;
-    slicing off-the-end raises an exception, while it works for NumPy arrays.
+    Parameters
+    ----------
+    n : int
+        Number to which the slices add upto
+    n_packs : int
+        Number of slices
+    n_samples : int, default None
+        Pass this when the slices are to be used for sparse matrix indexing;
+        slicing off-the-end raises exception, while it works for NumPy arrays.
+
+    Raises
+    ------
+    ValueError
+        If n_packs < 1, raises this error
+
+    Returns
+    -------
+    generator:
+        Iterator consisting of n_packs slices adding upto n
 
     Examples
     --------
