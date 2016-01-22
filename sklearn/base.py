@@ -37,6 +37,12 @@ def clone(estimator, safe=True):
         If safe is false, clone will fall back to a deepcopy on objects
         that are not estimators.
 
+    Raises
+    ------
+    TypeError
+        If estimator is not a scikit-learn estimator when ``safe`` is True
+    RuntimeError
+        If the constructor does not set some parameter in the clone
     """
     estimator_type = type(estimator)
     # XXX: not handling dictionaries
@@ -245,6 +251,11 @@ class BaseEstimator(object):
         (such as pipelines). The former have parameters of the form
         ``<component>__<parameter>`` so that it's possible to update each
         component of a nested object.
+
+        Raises
+        ------
+        ValueError
+            Invalid parameter passed in ``params``
 
         Returns
         -------
