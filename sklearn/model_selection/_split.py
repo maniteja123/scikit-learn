@@ -175,6 +175,11 @@ class LeaveOneOut(BaseCrossValidator):
         labels : object
             Always ignored, exists for compatibility.
 
+        Raises
+        ------
+        ValueError
+            If ``X`` is None
+
         Returns
         -------
         n_splits : int
@@ -250,6 +255,16 @@ class LeavePOut(BaseCrossValidator):
 
         labels : object
             Always ignored, exists for compatibility.
+            
+        Raises
+        ------
+        ValueError
+            If ``X`` is None
+
+        Returns
+        -------
+        n_splits : int
+            Returns the number of splitting iterations in the cross-validator.
         """
         if X is None:
             raise ValueError("The X parameter should not be None")
@@ -296,6 +311,11 @@ class _BaseKFold(with_metaclass(ABCMeta, BaseCrossValidator)):
         labels : array-like, with shape (n_samples,), optional
             Group labels for the samples used while splitting the dataset into
             train/test set.
+
+        Raises
+        ------
+        ValueError
+            If ``n_folds`` is greater than number of samples
 
         Returns
         -------
@@ -360,6 +380,14 @@ class KFold(_BaseKFold):
     random_state : None, int or RandomState
         When shuffle=True, pseudo-random number generator state used for
         shuffling. If None, use default numpy RNG for shuffling.
+
+    Raises
+    ------
+    Exceptions raised for invalid values passed to the constructor
+    ValueError
+        If ``n_folds`` is not an integer
+        If ``n_folds`` <= 1, requires n_folds=2 or more
+        If ``shuffle`` is not bool instance, i.e, ``True`` or ``False``
 
     Examples
     --------
@@ -428,6 +456,13 @@ class LabelKFold(_BaseKFold):
     ----------
     n_folds : int, default=3
         Number of folds. Must be at least 2.
+
+    Raises
+    ------
+    Exceptions raised for invalid values passed to the constructor
+    ValueError
+        If ``n_folds`` is not an integer
+        If ``n_folds`` <= 1, requires n_folds=2 or more
 
     Examples
     --------
@@ -525,6 +560,14 @@ class StratifiedKFold(_BaseKFold):
     random_state : None, int or RandomState
         When shuffle=True, pseudo-random number generator state used for
         shuffling. If None, use default numpy RNG for shuffling.
+
+    Raises
+    ------
+    Exceptions raised for invalid values passed to the constructor
+    ValueError
+        If ``n_folds`` is not an integer
+        If ``n_folds`` <= 1, requires n_folds=2 or more
+        If ``shuffle`` is not bool instance, i.e, ``True`` or ``False``
 
     Examples
     --------
@@ -666,6 +709,11 @@ class LeaveOneLabelOut(BaseCrossValidator):
             Group labels for the samples used while splitting the dataset into
             train/test set.
 
+        Raises
+        ------
+        ValueError
+            If ``labels`` is None
+
         Returns
         -------
         n_splits : int
@@ -758,6 +806,11 @@ class LeavePLabelOut(BaseCrossValidator):
         labels : array-like, with shape (n_samples,), optional
             Group labels for the samples used while splitting the dataset into
             train/test set.
+
+        Raises
+        ------
+        ValueError
+            If ``labels`` is None
 
         Returns
         -------
@@ -1335,6 +1388,12 @@ def check_cv(cv=3, y=None, classifier=False):
         Whether the task is a classification task, in which case
         stratified KFold will be used.
 
+    Raises
+    ------
+    ValueError
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
+
     Returns
     -------
     checked_cv : a cross-validator instance.
@@ -1400,14 +1459,6 @@ def train_test_split(*arrays, **options):
     stratify : array-like or None (default is None)
         If not None, data is split in a stratified fashion, using this as
         the labels array.
-
-
-    Raises
-    ------
-    ValueError
-        If no arrays are passed as input
-        If options has paramters other than ``test_size``, ``train_size``,
-        ``random_state`` or ``stratify``
 
     Returns
     -------

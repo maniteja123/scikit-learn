@@ -303,6 +303,15 @@ def fit_grid_point(X, y, estimator, parameters, train, test, scorer,
         FitFailedWarning is raised. This parameter does not affect the refit
         step, which will always raise the error.
 
+    Raises
+    ------
+    ValueError
+        If estimator kernel values are to be computed with custom function
+        If Precomputed kernels or affinity matrices are not passed
+            as arrays or sparse matrices
+        If ``X`` is not a square kernel matrix
+        If `error_score`` is not integer or ``raise``.
+
     Returns
     -------
     score : float
@@ -400,6 +409,12 @@ class BaseSearchCV(six.with_metaclass(ABCMeta, BaseEstimator,
         y : array-like, shape = [n_samples] or [n_samples, n_output], optional
             Target relative to X for classification or regression;
             None for unsupervised learning.
+
+        Raises
+        ------
+        ValueError
+            No score function explicitly defined and also not defined in the
+            base estimator
 
         Returns
         -------

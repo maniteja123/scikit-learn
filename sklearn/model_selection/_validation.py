@@ -141,8 +141,9 @@ def cross_val_score(estimator, X, y=None, labels=None, scoring=None, cv=None,
         If estimator kernel values are to be computed with custom function
         If Precomputed kernels or affinity matrices are not passed
             as arrays or sparse matrices
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
         If ``X`` is not a square kernel matrix
-        If ``error_score`` is not string 'raise' or a numeric value.
         If ``scorer`` does not return a number for testing set
 
     Returns
@@ -376,6 +377,8 @@ def cross_val_predict(estimator, X, y=None, labels=None, cv=None, n_jobs=1,
             as arrays or sparse matrices
         If ``X`` is not a square kernel matrix
         If ``error_score`` is not string 'raise' or a numeric value.
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
 
     Returns
     -------
@@ -560,6 +563,8 @@ def permutation_test_score(estimator, X, y, labels=None, cv=None,
     ------
     ValueError
         If seed is not None or int or RandomState
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
     TypeError
         If ``estimator`` has no ``fit`` method
         If both ``scoring`` is ``None`` and ``estimator``
@@ -711,6 +716,20 @@ def learning_curve(estimator, X, y, labels=None,
     verbose : integer, optional
         Controls the verbosity: the higher, the more messages.
 
+    Raises
+    ------
+    ValueError
+        If estimator does not support partial fit method
+        If estimator kernel values are to be computed with custom function
+        If Precomputed kernels or affinity matrices are not passed
+            as arrays or sparse matrices
+        If ``X`` is not a square kernel matrix
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
+    TypeError
+        If ``estimator`` has no ``fit`` method
+        If both ``scoring`` is ``None`` and ``estimator``
+            does not have ``score`` method
     Returns
     -------
     train_sizes_abs : array, shape = (n_unique_ticks,), dtype int
@@ -919,6 +938,21 @@ def validation_curve(estimator, X, y, param_name, param_range, labels=None,
 
     verbose : integer, optional
         Controls the verbosity: the higher, the more messages.
+
+    Raises
+    ------
+    TypeError
+        If ``estimator`` has no ``fit`` method
+        If both ``scoring`` is ``None`` and ``estimator``
+            does not have ``score`` method
+    ValueError
+        If estimator kernel values are to be computed with custom function
+        If Precomputed kernels or affinity matrices are not passed
+            as arrays or sparse matrices
+        If ``cv`` is not None or integer or cross-validation object or
+            iterable
+        If ``X`` is not a square kernel matrix
+        If ``scorer`` does not return a number for testing set
 
     Returns
     -------
