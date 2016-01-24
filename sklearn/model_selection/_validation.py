@@ -131,6 +131,20 @@ def cross_val_score(estimator, X, y=None, labels=None, scoring=None, cv=None,
             - A string, giving an expression as a function of n_jobs,
               as in '2*n_jobs'
 
+    Raises
+    ------
+    TypeError
+        If ``estimator`` has no ``fit`` method
+        If both ``scoring`` is ``None`` and ``estimator``
+            does not have ``score`` method
+    ValueError
+        If estimator kernel values are to be computed with custom function
+        If Precomputed kernels or affinity matrices are not passed
+            as arrays or sparse matrices
+        If ``X`` is not a square kernel matrix
+        If ``error_score`` is not string 'raise' or a numeric value.
+        If ``scorer`` does not return a number for testing set
+
     Returns
     -------
     scores : array of float, shape=(len(list(cv)),)
@@ -354,6 +368,15 @@ def cross_val_predict(estimator, X, y=None, labels=None, cv=None, n_jobs=1,
             - A string, giving an expression as a function of n_jobs,
               as in '2*n_jobs'
 
+    Raises
+    ------
+    ValueError
+        If estimator kernel values are to be computed with custom function
+        If Precomputed kernels or affinity matrices are not passed
+            as arrays or sparse matrices
+        If ``X`` is not a square kernel matrix
+        If ``error_score`` is not string 'raise' or a numeric value.
+
     Returns
     -------
     predictions : ndarray
@@ -532,6 +555,15 @@ def permutation_test_score(estimator, X, y, labels=None, cv=None,
 
     verbose : integer, optional
         The verbosity level.
+
+    Raises
+    ------
+    ValueError
+        If seed is not None or int or RandomState
+    TypeError
+        If ``estimator`` has no ``fit`` method
+        If both ``scoring`` is ``None`` and ``estimator``
+            does not have ``score`` method
 
     Returns
     -------

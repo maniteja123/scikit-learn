@@ -1401,6 +1401,14 @@ def train_test_split(*arrays, **options):
         If not None, data is split in a stratified fashion, using this as
         the labels array.
 
+
+    Raises
+    ------
+    ValueError
+        If no arrays are passed as input
+        If options has paramters other than ``test_size``, ``train_size``,
+        ``random_state`` or ``stratify``
+
     Returns
     -------
     splitting : list, length=2 * len(arrays)
