@@ -6,5 +6,6 @@ Propagation.
 """
 
 from .label_propagation import LabelPropagation, LabelSpreading
+from .self_taught import SelfTaughtLearner
 
-__all__ = ['LabelPropagation', 'LabelSpreading']
+__all__ = ['LabelPropagation', 'LabelSpreading', 'SelfTaughtLearner']
