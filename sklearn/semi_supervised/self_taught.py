@@ -9,17 +9,37 @@ data. These features form a succinct input representation and significantly impr
 
 Examples
 --------
->>> from sklearn import datasets
->>> from sklearn.semi_supervised import SelfLearningEstimator
+>>> from sklearn.semi_supervised import SelfTaughtLearner
 >>> from sklearn.svm import LinearSVC
->>> self_learnt_model = SelfLearningEstimator(estimator=LinearSVC())
->>> mnist = datasets.fetch_mldata("MNIST original")
->>> X, y = mnist.data / 255., mnist.target
->>> random_unlabeled_points = np.where(np.random.random_integers(0, 1,
-...        size=len(mnist.target)))
->>> labels = np.copy(mnist.target)
+>>> from sklearn import datasets
+>>> import numpy as np
+>>> from sklearn import metrics
+>>> from sklearn.cluster import KMeans
+>>> from sklearn.preprocessing import scale
+>>> digits = datasets.load_digits()
+>>> data = scale(digits.data)
+>>> n_samples, n_features = data.shape
+>>> n_digits = len(np.unique(digits.target))
+>>> d = KMeans(init='k-means++', n_clusters=n_digits, n_init=10)
+>>> s = LinearSVC()
+>>> m = SelfTaughtLearner(d, s)
+>>> X, y = digits.data / 255., digits.target
+>>> X_train, X_test = X[:1500], X[1500:]
+>>> y_train, y_test = y[:1500], y[1500:]
+>>> labels = np.copy(digits.target)
+>>> random_unlabeled_points = np.where(np.random.random_integers(0, 1, size=len(digits.target)))
 >>> labels[random_unlabeled_points] = -1
->>> self_learnt_model.fit(X, labels)
+>>> m.fit(X, labels)
+SelfTaughtLearner(estimator=LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
+     intercept_scaling=1, loss='squared_hinge', max_iter=1000,
+     multi_class='ovr', penalty='l2', random_state=None, tol=0.0001,
+     verbose=0),
+         transformer=KMeans(copy_x=True, init='k-means++', max_iter=300, n_clusters=10, n_init=10,
+    n_jobs=1, precompute_distances='auto', random_state=None, tol=0.0001,
+    verbose=0))
+>>> y_pred = m.predict(X_test)
+>>> print metrics.accuracy_score(y_pred, y_test)
+0.804713804714
 
 Notes
 -----
@@ -43,6 +63,17 @@ from ..utils.validation import check_X_y, check_is_fitted, check_array
 class SelfTaughtLearner(six.with_metaclass(ABCMeta, BaseEstimator,
                                               ClassifierMixin)):
     def __init__(self, transformer, estimator):
+        """
+        Attributes
+        ----------
+        transformer : estimator object
+            An estimator object implementing `transform`.
+
+        estimator : estimator object
+            An estimator object implementing `fit`,`score` and `predict_proba`.
+
+        """
+
         self.transformer = transformer;
         self.estimator = estimator;
 
