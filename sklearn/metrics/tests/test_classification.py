@@ -117,6 +117,19 @@ def test_multilabel_accuracy_score_subset_accuracy():
     assert_equal(accuracy_score(y2, np.zeros(y1.shape)), 0)
 
 
+def test_multiclass_multioutput_accuracy_score():
+    y1 = np.array([[1, 2], [3, 1]])
+    y2 = np.array([[1, 2], [1, 3]])
+    y3 = np.array([[1, 0], [1, 5]])
+
+    assert_equal(accuracy_score(y1, y3), 0.0)
+    assert_equal(accuracy_score(y1, y2), 0.5)
+    assert_equal(accuracy_score(y1, y1), 1)
+    assert_equal(accuracy_score(y1, y2, normalize=False), 1)
+    assert_equal(accuracy_score(y1, y1, normalize=False), 2)
+    assert_equal(accuracy_score(y2, y3, normalize=False), 0)
+
+
 def test_precision_recall_f1_score_binary():
     # Test Precision Recall and F1 Score for binary classification task
     y_true, y_pred, _ = make_prediction(binary=True)
@@ -733,6 +746,13 @@ def test_multilabel_zero_one_loss_subset():
     assert_equal(zero_one_loss(y2, np.zeros(y1.shape)), 1)
 
 
+def test_multiclass_multioutput_zero_one_score():
+    assert_equal(zero_one_loss(np.array([[1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])),0.0)
+    assert_equal(zero_one_loss(np.array([[1, 2], [3, 4]]), np.array([[2, 1], [4, 3]])),1.0)
+    assert_equal(zero_one_loss(np.array([[-1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])),0.5)
+    assert_equal(zero_one_loss(np.array([[-1, 2], [3, 4]]), np.array([[1, 1], [3, 4]])),0.5)
+
+
 def test_multilabel_hamming_loss():
     # Dense label indicator matrix format
     y1 = np.array([[0, 1, 1], [1, 0, 1]])
@@ -1168,7 +1188,7 @@ def test__check_targets():
         (IND, IND): IND,
         (MC, MC): MC,
         (BIN, BIN): BIN,
-
+        (MMC, MMC): MMC,
         (MC, IND): None,
         (BIN, IND): None,
         (BIN, MC): MC,
@@ -1206,7 +1226,7 @@ def test__check_targets():
                     _check_targets, y1, y2)
 
             else:
-                if type1 not in (BIN, MC, IND):
+                if type1 not in (BIN, MC, IND, MMC):
                     assert_raise_message(ValueError,
                                          "{0} is not supported".format(type1),
                                          _check_targets, y1, y2)
@@ -1214,7 +1234,7 @@ def test__check_targets():
         else:
             merged_type, y1out, y2out = _check_targets(y1, y2)
             assert_equal(merged_type, expected)
-            if merged_type.startswith('multilabel'):
+            if merged_type.startswith('multilabel') or merged_type == 'multiclass-multioutput':
                 assert_equal(y1out.format, 'csr')
                 assert_equal(y2out.format, 'csr')
             else:

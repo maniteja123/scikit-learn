@@ -84,7 +84,8 @@ def _check_targets(y_true, y_pred):
     y_type = y_type.pop()
 
     # No metrics support "multiclass-multioutput" format
-    if (y_type not in ["binary", "multiclass", "multilabel-indicator"]):
+    if (y_type not in ["binary", "multiclass", "multilabel-indicator",
+        "multiclass-multioutput"]):
         raise ValueError("{0} is not supported".format(y_type))
 
     if y_type in ["binary", "multiclass"]:
@@ -95,6 +96,10 @@ def _check_targets(y_true, y_pred):
         y_true = csr_matrix(y_true)
         y_pred = csr_matrix(y_pred)
         y_type = 'multilabel-indicator'
+
+    if y_type=="multiclass-multioutput":
+        y_true = csr_matrix(y_true)
+        y_pred = csr_matrix(y_pred)
 
     return y_type, y_true, y_pred
 
@@ -169,7 +174,7 @@ def accuracy_score(y_true, y_pred, normalize=True, sample_weight=None):
 
     # Compute accuracy for each possible representation
     y_type, y_true, y_pred = _check_targets(y_true, y_pred)
-    if y_type.startswith('multilabel'):
+    if y_type.startswith('multilabel') or y_type=="multiclass-multioutput":
         differing_labels = count_nonzero(y_true - y_pred, axis=1)
         score = differing_labels == 0
     else:
@@ -388,10 +393,19 @@ def jaccard_similarity_score(y_true, y_pred, normalize=True,
     >>> jaccard_similarity_score(np.array([[0, 1], [1, 1]]),\
         np.ones((2, 2)))
     0.75
+
+    In the case of multiclass-multioutput targets
+
+    >>> y_true = np.array([[1,2,3],[1,2,1]])
+    >>> y_pred = np.array([[1,2,3],[1,2,3]])
+    >>> jaccard_similarity_score(y_true, y_pred)
+    0.75
+
     """
 
     # Compute accuracy for each possible representation
     y_type, y_true, y_pred = _check_targets(y_true, y_pred)
+    print y_type
     if y_type.startswith('multilabel'):
         with np.errstate(divide='ignore', invalid='ignore'):
             # oddly, we may get an "invalid" rather than a "divide" error here
@@ -403,9 +417,14 @@ def jaccard_similarity_score(y_true, y_pred, normalize=True,
             # the jaccard to 1: lim_{x->0} x/x = 1
             # Note with py2.6 and np 1.3: we can't check safely for nan.
             score[pred_or_true == 0.0] = 1.0
+    elif y_type == "multiclass-multioutput":
+        y_true = y_true.toarray()
+        y_pred = y_pred.toarray()
+        pred_and_true = count_nonzero(csr_matrix(np.asarray(y_true == y_pred, dtype=np.int)), axis=1)
+        pred_or_true = np.full(pred_and_true.shape, 2*y_true.shape[1]) - pred_and_true
+        score = pred_and_true / pred_or_true
     else:
         score = y_true == y_pred
-
     return _weighted_sum(score, sample_weight, normalize)
 
 
