@@ -56,6 +56,7 @@ __all__ = [
     "OneVsRestClassifier",
     "OneVsOneClassifier",
     "OutputCodeClassifier",
+    "ClassifierChain"
 ]
 
 
@@ -755,3 +756,104 @@ class OutputCodeClassifier(BaseEstimator, ClassifierMixin, MetaEstimatorMixin):
         Y = np.array([_predict_binary(e, X) for e in self.estimators_]).T
         pred = euclidean_distances(Y, self.code_book_).argmin(axis=1)
         return self.classes_[pred]
+
+
+"""
+Classifier Chain.
+Use classifier chain as a meta-algorithm to
+combine classifiers for each label.
+"""
+
+# Author: Chih-Wei (Bert) Chang <bert.cwchang@gmail.com>
+
+import numpy as np
+
+from ..base import BaseEstimator, clone
+
+
+class ClassifierChain(BaseEstimator):
+    """Classifier Chain
+    Classifier chain [1] fit classifiers for each label,
+    and chains the classifiers to make prediction.
+
+    Parameters
+    ----------
+    estimator : estimator object
+        The base estimator used for fitting each label.
+
+    Attributes
+    ----------
+    n_labels_ : int
+        How many labels are there in this model.
+    estimators_ : array of estimators, shape = [n_outputs]
+        List of classifiers, which will be used to chain prediction.
+
+    References
+    ----------
+    .. [1] Jesse Read, Bernhard Pfahringer, Geoff Holmes, Eibe Frank,
+           "Classifier Chains for Multi-label Classification", 2009.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from sklearn.datasets import make_multilabel_classification
+    >>> from sklearn.multi_label import ClassifierChain
+    >>> from sklearn.svm import LinearSVC
+    >>> X, Y = make_multilabel_classification(return_indicator=True,
+    ...                                       random_state=0)
+    >>> cc = ClassifierChain(base_estimator=LinearSVC())
+    >>> cc.fit(X, Y) #doctest: +NORMALIZE_WHITESPACE
+    ClassifierChain(estimator=LinearSVC(C=1.0, class_weight=None,
+                                             dual=True, fit_intercept=True,
+                                             intercept_scaling=1,
+                                             loss='squared_hinge',
+                                             max_iter=1000, multi_class='ovr',
+                                             penalty='l2', random_state=None,
+                                             tol=0.0001, verbose=0))
+    """
+
+    def __init__(self, estimator):
+        self.estimator = estimator
+        self.estimators_ = []
+
+    def fit(self, X, y):
+        """ Build a sequence of classifiers
+
+        Parameters
+        ----------
+        X : array_like, shape (n_samples, n_features)
+            List of n_features-dimensional data points.  Each row
+            corresponds to a single data point.
+        y : array_like, shape (n_samples, n_labels)
+            List of n_labels-dimensional data points.  Each row
+            corresponds to a label indicators.
+        """
+        n_labels_ = y.shape[1]
+        self.estimators_ = []
+
+        for i in range(self.n_labels_):
+            y_label = Y[:, i]
+            clf = clone(self.base_estimator)
+            clf.fit(X, y)
+            self.estimators_.append(clf)
+            X = self._predict_and_chain(clf, X)
+
+        return self
+
+    def predict(self, X):
+        """Predict label for data.
+        Parameters
+        ----------
+        X : array-like, shape = [n_samples, n_features]
+        Returns
+        -------
+        y : array, shape = [n_samples, n_labels]
+        """
+
+        for clf in self.estimators_:
+            X = self._predict_and_chain(clf, X)
+
+        return X[:, -self.n_labels_:]
+
+    def _predict_and_chain(self, clf, X):
+        return np.hstack((X, clf.predict(X).reshape(-1, 1)))
